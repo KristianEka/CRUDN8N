@@ -201,22 +201,6 @@ function App() {
           loading={loading}
         />
 
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="font-semibold text-blue-900 mb-2">Konfigurasi n8n Webhook</h4>
-          <p className="text-sm text-blue-800 mb-2">
-            Untuk menghubungkan aplikasi ini dengan n8n, pastikan Anda telah membuat workflow dengan endpoint berikut:
-          </p>
-          <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li><code className="bg-blue-100 px-2 py-1 rounded">GET /sales</code> - Mengambil semua data penjualan</li>
-            <li><code className="bg-blue-100 px-2 py-1 rounded">POST /sales</code> - Menambah data penjualan baru</li>
-            <li><code className="bg-blue-100 px-2 py-1 rounded">PUT /sales/:id</code> - Mengupdate data penjualan</li>
-            <li><code className="bg-blue-100 px-2 py-1 rounded">DELETE /sales/:id</code> - Menghapus data penjualan</li>
-            <li><code className="bg-blue-100 px-2 py-1 rounded">POST /upload</code> - Upload file CSV/XLSX</li>
-          </ul>
-          <p className="text-sm text-blue-800 mt-2">
-            Atur URL webhook n8n di file <code className="bg-blue-100 px-2 py-1 rounded">.env</code> dengan variabel <code className="bg-blue-100 px-2 py-1 rounded">VITE_N8N_WEBHOOK_URL</code>
-          </p>
-        </div>
       </main>
 
       {showForm && (

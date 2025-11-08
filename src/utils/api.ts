@@ -333,11 +333,12 @@ export const api = {
       }
 
       const payload = data as { status?: string; message?: string };
-      if (payload.status && payload.status !== "success") {
+      const status = payload.status ?? "success";
+      if (status !== "success") {
         throw new Error(payload.message || "Gagal mengupload file");
       }
 
-      return payload;
+      return { status, message: payload.message };
     } catch (error) {
       console.error("Error uploading file:", error);
       throw error;
