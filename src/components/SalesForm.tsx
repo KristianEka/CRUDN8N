@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
-import { SalesData } from '../types';
+import { useState } from "react";
+import { X } from "lucide-react";
+import { SalesData } from "../types";
 
 interface SalesFormProps {
   onSubmit: (data: Omit<SalesData, 'id_transaksi'>) => void;
@@ -27,20 +27,47 @@ export const SalesForm = ({ onSubmit, onClose, initialData, isEdit = false }: Sa
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    // Validate customer name - must not be empty and minimum length
     if (!formData.nama_pelanggan.trim()) {
       newErrors.nama_pelanggan = 'Nama pelanggan wajib diisi';
+    } else if (formData.nama_pelanggan.trim().length < 2) {
+      newErrors.nama_pelanggan = 'Nama pelanggan minimal 2 karakter';
     }
+
+    // Validate product - must not be empty and minimum length
     if (!formData.produk.trim()) {
       newErrors.produk = 'Produk wajib diisi';
+    } else if (formData.produk.trim().length < 2) {
+      newErrors.produk = 'Nama produk minimal 2 karakter';
     }
+
+    // Validate quantity - must be positive number and within reasonable range
     if (formData.qty <= 0) {
       newErrors.qty = 'Qty harus lebih dari 0';
+    } else if (!Number.isInteger(formData.qty)) {
+      newErrors.qty = 'Qty harus berupa bilangan bulat';
+    } else if (formData.qty > 999999) {
+      newErrors.qty = 'Qty terlalu besar';
     }
+
+    // Validate price - must be positive number and within reasonable range
     if (formData.harga <= 0) {
       newErrors.harga = 'Harga harus lebih dari 0';
+    } else if (formData.harga > 999999) {
+      newErrors.harga = 'Harga terlalu besar';
     }
+
+    // Validate date - must not be empty and should be valid
     if (!formData.tanggal) {
       newErrors.tanggal = 'Tanggal wajib diisi';
+    } else {
+      // Check if date is valid
+      const date = new Date(formData.tanggal);
+      if (isNaN(date.getTime())) {
+        newErrors.tanggal = 'Format tanggal tidak valid';
+      } else if (date > new Date()) {
+        newErrors.tanggal = 'Tanggal tidak boleh di masa depan';
+      }
     }
 
     setErrors(newErrors);
@@ -60,11 +87,24 @@ export const SalesForm = ({ onSubmit, onClose, initialData, isEdit = false }: Sa
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === 'qty' || name === 'harga' ? Number(value) : value,
-    }));
+    
+    // For numeric fields, validate and convert to number
+    if (name === 'qty' || name === 'harga') {
+      // Only allow positive numbers and empty values
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value === '' ? 0 : Number(value),
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
 
+    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }

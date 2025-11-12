@@ -1,17 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Plus, Upload as UploadIcon } from 'lucide-react';
-import { Header } from './components/Header';
-import { SalesForm } from './components/SalesForm';
-import { SalesTable } from './components/SalesTable';
-import { FileUpload } from './components/FileUpload';
-import { DeleteConfirmation } from './components/DeleteConfirmation';
-import { TemplateDownload } from './components/TemplateDownload';
-import { DataDownload } from './components/DataDownload';
-import { Notification } from './components/Notification';
-import { SalesData } from './types';
-import { api } from './utils/api';
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Upload as UploadIcon } from "lucide-react";
+import { Header } from "./components/Header";
+import { SalesForm } from "./components/SalesForm";
+import { SalesTable } from "./components/SalesTable";
+import { FileUpload } from "./components/FileUpload";
+import { DeleteConfirmation } from "./components/DeleteConfirmation";
+import { TemplateDownload } from "./components/TemplateDownload";
+import { DataDownload } from "./components/DataDownload";
+import { Notification } from "./components/Notification";
+import { SalesData } from "./types";
+import { api } from "./utils/api";
 
 function App() {
+  // State management
   const [salesData, setSalesData] = useState<SalesData[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
@@ -20,11 +21,14 @@ function App() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     message: string;
   } | null>(null);
-  const [downloadingFormat, setDownloadingFormat] = useState<'csv' | 'xlsx' | null>(null);
+  const [downloadingFormat, setDownloadingFormat] = useState<
+    "csv" | "xlsx" | null
+  >(null);
 
+  // Data operations
   const loadSalesData = useCallback(async () => {
     setLoading(true);
     try {
@@ -32,51 +36,54 @@ function App() {
       setSalesData(data);
     } catch (error) {
       setNotification({
-        type: 'error',
-        message: 'Gagal memuat data penjualan. Pastikan koneksi ke n8n webhook berfungsi.',
+        type: "error",
+        message:
+          "Gagal memuat data penjualan. Pastikan koneksi ke n8n webhook berfungsi.",
       });
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    loadSalesData();
-  }, [loadSalesData]);
-
-  const handleAddData = async (data: Omit<SalesData, 'id_transaksi'>) => {
+  const handleAddData = async (data: Omit<SalesData, "id_transaksi">) => {
     try {
       await api.createSalesData(data);
       setNotification({
-        type: 'success',
-        message: 'Data penjualan berhasil ditambahkan!',
+        type: "success",
+        message: "Data penjualan berhasil ditambahkan!",
       });
       setShowForm(false);
       loadSalesData();
     } catch (error) {
       setNotification({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Gagal menambah data penjualan',
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Gagal menambah data penjualan",
       });
     }
   };
 
-  const handleEditData = async (data: Omit<SalesData, 'id_transaksi'>) => {
+  const handleEditData = async (data: Omit<SalesData, "id_transaksi">) => {
     if (!editingItem) return;
 
     try {
       await api.updateSalesData(editingItem.id_transaksi, data);
       setNotification({
-        type: 'success',
-        message: 'Data penjualan berhasil diupdate!',
+        type: "success",
+        message: "Data penjualan berhasil diupdate!",
       });
       setShowForm(false);
       setEditingItem(null);
       loadSalesData();
     } catch (error) {
       setNotification({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Gagal mengupdate data penjualan',
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Gagal mengupdate data penjualan",
       });
     }
   };
@@ -87,16 +94,19 @@ function App() {
     try {
       await api.deleteSalesData(deletingId);
       setNotification({
-        type: 'success',
-        message: 'Data penjualan berhasil dihapus!',
+        type: "success",
+        message: "Data penjualan berhasil dihapus!",
       });
       setShowDeleteConfirm(false);
       setDeletingId(null);
       loadSalesData();
     } catch (error) {
       setNotification({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Gagal menghapus data penjualan',
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Gagal menghapus data penjualan",
       });
     }
   };
@@ -105,26 +115,27 @@ function App() {
     try {
       await api.uploadFile(file);
       setNotification({
-        type: 'success',
-        message: 'File berhasil diupload dan data telah diproses!',
+        type: "success",
+        message: "File berhasil diupload dan data telah diproses!",
       });
       setShowUpload(false);
       loadSalesData();
     } catch (error) {
       setNotification({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Gagal mengupload file',
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Gagal mengupload file",
       });
       throw error;
     }
   };
 
-  const handleDownloadFile = async (format: 'csv' | 'xlsx') => {
+  const handleDownloadFile = async (format: "csv" | "xlsx") => {
     setDownloadingFormat(format);
     try {
       const { blob, filename } = await api.downloadFile(format);
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -132,19 +143,23 @@ function App() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       setNotification({
-        type: 'success',
+        type: "success",
         message: `File ${format.toUpperCase()} berhasil diunduh!`,
       });
     } catch (error) {
       setNotification({
-        type: 'error',
-        message: error instanceof Error ? error.message : `Gagal mengunduh file ${format.toUpperCase()}`,
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : `Gagal mengunduh file ${format.toUpperCase()}`,
       });
     } finally {
       setDownloadingFormat(null);
     }
   };
 
+  // UI handlers
   const handleEdit = (item: SalesData) => {
     setEditingItem(item);
     setShowForm(true);
@@ -160,11 +175,17 @@ function App() {
     setEditingItem(null);
   };
 
+  // Initialize data on component mount
+  useEffect(() => {
+    loadSalesData();
+  }, [loadSalesData]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
 
       <main className="container mx-auto px-4 py-8">
+        {/* Action buttons */}
         <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <button
             onClick={() => setShowForm(true)}
@@ -182,6 +203,7 @@ function App() {
           </button>
         </div>
 
+        {/* Download components */}
         <div className="mb-6">
           <TemplateDownload />
         </div>
@@ -193,6 +215,7 @@ function App() {
           />
         </div>
 
+        {/* Sales table */}
         <SalesTable
           data={salesData}
           onEdit={handleEdit}
@@ -200,9 +223,9 @@ function App() {
           onRefresh={loadSalesData}
           loading={loading}
         />
-
       </main>
 
+      {/* Modal components */}
       {showForm && (
         <SalesForm
           onSubmit={editingItem ? handleEditData : handleAddData}
